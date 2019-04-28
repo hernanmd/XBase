@@ -169,7 +169,7 @@ XBaseFile class >> dbfBytesFrom: aString [
 	"XBaseFile dbfBytesFrom: 'D:\etarcview\berisp\subcad.dbf'"
 
 	| stream bytes |
-	stream := aString asFileReference readStream binary.
+	stream := aString asFileReference binaryReadStream.
 	stream size > 200000000 ifTrue: [
 		stream setConverterToLatin1.
 		^ stream ].
