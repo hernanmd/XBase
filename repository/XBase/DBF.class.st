@@ -46,7 +46,7 @@ DBF >> dbfBytesToFile: aString [
 	dbf writeOnFile: 'example1.dbf' "
 
 	| aStream writingBlock |
-	aStream := (StandardFileStream fileNamed: aString) binary.
+	aStream := aString asFileReference binaryReadStream.
 	writingBlock := [aStream nextPutAll: fileStream contents].
 	writingBlock ensure: [aStream close]
 ]

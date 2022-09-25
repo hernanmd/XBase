@@ -1,9 +1,12 @@
 "
 A Smalltalk class giving full access to Xbase (dBASE) files (dBASE III/IV). Hans Baveco, November 3, 2004.
-A rewrite of a Squeak goodie (XBase, version 1.00, published Feb 13, 1998 by andavino@tin.it). Ported to VisualWorks, back-ported to Squeak!
+A rewrite of a Squeak goodie (XBase, version 1.00, published Feb 13, 1998 by andavino@tin.it). 
+Ported to VisualWorks, back-ported to Squeak, back-ported to Pharo
 
+# Examples
 
 Open a dbf file with:
+```language=Pharo
 	| dbf | 
 	""dbf := XBaseFile on: 'd:\DBF\allotments.dbf'. ""
 	dbf := XBaseFile on: 'D:\etarcview\berisp\subcad.dbf'. 
@@ -12,39 +15,53 @@ Open a dbf file with:
 	dbf inspect.
 ""Close it with:""
 	dbf close
+```
 	
 Retrieve the contents of a dbf with:
-	XBaseFile recordsFromFile: 'd:\DBF\allotments.dbf'. 
-or
-	XBaseFile recordsFromUser.
-The file does not need to be explicitly closed now.
-If you want to have the field(labels) as well:
-	XBaseFile recordsAndFieldsFromFile: 'd:\DBF\allotments.dbf'. 
-or
-	XBaseFile recordsAndFieldsFromUser.
 
+```language=Pharo
+	XBaseFile recordsFromFile: 'd:\DBF\allotments.dbf'.
+```
+or
+```language=Pharo
+	XBaseFile recordsFromUser.
+```
+The file does not need to be explicitly closed now.
+
+If you want to have the field(labels) as well:
+```language=Pharo
+	XBaseFile recordsAndFieldsFromFile: 'd:\DBF\allotments.dbf'. 
+```
+or
+```language=Pharo
+	XBaseFile recordsAndFieldsFromUser.
+```
 
 Create a new dbf file with the on:fields: method, e.g.:
+```
 	| dbf rng |
-	dbf := XBaseFile on: 'testEdit' fields: 
-		{#( 'abc' $N 5 0 nil). #( 'et_class' $C 12 0 nil). #( 'perimeter' $F 20 3 nil). #( 'logical' $L 1 0 nil)}.
-""4 fields, but still empty. Add records:""
+	dbf := XBaseFile 
+		on: 'testEdit' 
+		fields: { 
+			#( 'abc' $N 5 0 nil) . 
+			#( 'et_class' $C 12 0 nil) . 
+			#( 'perimeter' $F 20 3 nil) . 
+			#( 'logical' $L 1 0 nil) }.
+	""4 fields, but still empty. Add records:""
 	rng := Random new. rng seed: 2345678901.
-	1 to: 10
-		do: 
-			[:ix | 
-			dbf append.
-			dbf atFieldName: 'ABC' put: ix.
-			dbf atFieldName: 'ET_CLASS' put: 'MyClass', ix printString.
-			dbf atFieldName: 'PERIMETER' put: ix  * 123456.12345.
-			dbf atFieldName: 'LOGICAL' put: (rng next > 0.5)].
+	1 to: 10 	do: [ : ix | 
+		dbf append.
+		dbf atFieldName: 'ABC' put: ix.
+		dbf atFieldName: 'ET_CLASS' put: 'MyClass', ix printString.
+		dbf atFieldName: 'PERIMETER' put: ix  * 123456.12345.
+		dbf atFieldName: 'LOGICAL' put: (rng next > 0.5) ].
 	""if you know the index of a field, use the faster atField: anInteger put: fieldValue, instead of atFieldName: anInteger put: fieldValue""
 	dbf saveRecord. ""make sure the last record is also saved""
 	dbf inspect. ""and dbf contents""
 	dbf close ""dont forget, or do XBaseFile allInstances do: [:each | each close]""
-	
-======================================================================================================
- Instance Variables:
+```
+
+#  Instance Variables:
 	filterArray		-- Array with Blocks|nil	-- blocks that return true for [] value: self will lead to skipping the record
 	lastUpdate		-- Data					-- date of last save
 	fileName		-- String				-- name of currently open file
@@ -64,69 +81,48 @@ Create a new dbf file with the on:fields: method, e.g.:
 	fieldsFormats	-- Ord.Coll. with Arrays	-- each array with 4 elements: fieldtype, fieldsize, decimals, fieldoffset in record
 	fieldIndices		-- Dictionary			-- linking name of field (keys), to index in fieldFormats (value)
 
-======================================================================================================
-Record Header Structure of a DBF file (see http://www.e-bachmann.dk/docs/xbase.htm):
-byte
----------------------------------------------------------------------------
-0	Version number
-----------------------------------------------------------------------------
-1	Date of last update - year (0=1900)
-2	Date of last update - month
-3	Data of last update - day of month
----------------------------------------------------------------------------
-4	Number of records (32 bits)
-5
-6
-7
----------------------------------------------------------------------------
-8	Length of header structure (16 bits)
-9	
----------------------------------------------------------------------------
-10	Length of each record (16 bits)
-11
----------------------------------------------------------------------------
-12	- 31 Reserved, etc, etc
----------------------------------------------------------------------------
-32	Field Descriptor array (max 128 fields)
-	Per field 32 bytes (0 - 31), see description below
-n	n = 32 + fields*32 (or in numbers of bytes: 33 + fields*32)
------------------------------------------------------------------------------
-n+1	Terminator (16r0D = 13)
------------------------------------------------------------------------------
-m	Database Container
-m+263	(Something related to Visual FoxPro) WITHIN THE HEADER STRUCTURE!
------------------------------------------------------------------------------
+# Record Header Structure of a DBF file 
+See [http://www.e-bachmann.dk/docs/xbase.htm](http://www.e-bachmann.dk/docs/xbase.htm):
 
+|Byte|Description|
+|0|Version number|
+|1|	Date of last update - year (0=1900)|
+|2|	Date of last update - month|
+|3|	Data of last update - day of month|
+|4|	Number of records (32 bits)|
+|5|-|
+|6|-|
+|7|-|
+|8|	Length of header structure (16 bits)|
+|9|	-|
+|10	|Length of each record (16 bits)|
+|11|-|
+|12	- 31| Reserved, etc, etc|
+|32|Field Descriptor array (max 128 fields). Per field 32 bytes (0 - 31), see description below|
+|n|n = 32 + fields*32 (or in numbers of bytes: 33 + fields*32)|
+|n+1|Terminator (16r0D = 13)|
+|m|	Database Container|
+|m+263|	(Something related to Visual FoxPro) WITHIN THE HEADER STRUCTURE!|
 
 Now the Field Descriptor array:
-byte
-0	Field name in ASCII
-10	(terminated by 16r00)
------------------------------------------------------------------------------
-11	Field type (ASCII)
------------------------------------------------------------------------------
-12	Field data address
-15	(IRRELEVANT?)
------------------------------------------------------------------------------
-16	Field length
------------------------------------------------------------------------------
-17	Decimal count
------------------------------------------------------------------------------
-18	(reserved for multi-user dBASE)
-19
------------------------------------------------------------------------------
-20	Work area ID (16r01 in all dBASE III files)
------------------------------------------------------------------------------
-20	(reserved for multi-user dBASE)
-21
------------------------------------------------------------------------------
-23	Flag for SET FIELDS
------------------------------------------------------------------------------
-24	RESERVED
-30
------------------------------------------------------------------------------
-31	Index field flag (dBASE IV, 16r00 -> ignored)
------------------------------------------------------------------------------
+
+|Byte|Description|
+|0|	Field name in ASCII|
+|10|(terminated by 16r00)|
+|11|Field type (ASCII)|
+|12	|Field data address|
+|15	|(IRRELEVANT?)|
+|16	|Field length|
+|17	|Decimal count|
+|18	|(reserved for multi-user dBASE)|
+|19|-|
+|20	|Work area ID (16r01 in all dBASE III files)|
+|20	|(reserved for multi-user dBASE)|
+|21|-|
+|23	|Flag for SET FIELDS|
+|24	|RESERVED|
+|30|-|
+|31	|Index field flag (dBASE IV, 16r00 -> ignored)|
 
 And finally, record structure:
 
@@ -740,23 +736,24 @@ XBaseFile >> contents [
 { #category : #accessing }
 XBaseFile >> contentsAsCSVNamed: csvFileName [
 	"deleted records are NOT included"
-	| csv incr x |
+	| incr x |
 
 	incr := 1000 / nRecords.
 	self modificationTest.
 	fileStream position: headerSize.
 	x := 0.
-	csv := FileStream newFileNamed: csvFileName.
-	[ [ : job |
+	csvFileName asFileReference readStreamDo: [ : csvStream |
+	[ : job |
 		job title:  'Converting DBF to CSV (', csvFileName, '), total ', nRecords asString, ' records...'.
-		csv nextPutAll: self fields asCSVLine; cr.
+		csvStream nextPutAll: self fields asCSVLine; cr.
 		1 to: nRecords do: [ : i | 
-			[ csv nextPutAll: self recordDataFast asCSVLine; cr ] on: XBaseDeletedRecord do: [].
-				x := x + 1.
-				x = 1000 ifTrue: [
-					x := 0.
-					job progress: incr ] ] ] asJob run 
-	] ensure: [csv close].
+			[ csvStream nextPutAll: self recordDataFast asCSVLine; cr ] 
+			on: XBaseDeletedRecord 
+			do: [ ].
+			x := x + 1.
+			x = 1000 ifTrue: [
+				x := 0.
+				job progress: incr ] ] ] asJob run ].
 	self currentRecordIndex: nRecords.
 
 ]
@@ -827,7 +824,7 @@ XBaseFile >> contentsWithFields [
 XBaseFile >> create: fDictionary [ 
 	"create a new XBaseFile (with open file stream), with fields defined by fDictionary, and 0 records"
 	| pos |
-	fileStream := (StandardFileStream newFileNamed: fileName) binary.
+	fileStream := fileName asFileReference binaryReadStream.
 	lastUpdate := Date today.
 	nRecords := 0.
 	currentRecordIndex := 0.

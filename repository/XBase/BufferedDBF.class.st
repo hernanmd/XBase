@@ -8,7 +8,7 @@ Class {
 	#category : #'XBase-Base'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 BufferedDBF >> gotoRecord: recordNumber [ 
 	"position currentRecord to recordNumber"
 
@@ -23,7 +23,7 @@ BufferedDBF >> gotoRecord: recordNumber [
 	self currentRecordIndex: recordNumber
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 BufferedDBF >> open [
 	"Open an existing .DBF file in binary mode and copy the bytes into the <fileStream> instance variable"
 	"the dbf will be closed..."
@@ -40,7 +40,7 @@ BufferedDBF >> open [
 			^ self error: fileName , ': is not a .DBF file']
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 BufferedDBF >> recordDataFast [
 	"answer anArray with all the data in the current record (as Smalltalk objects, not bytes)"
 	"2009-08-12 CBC - Super fast is to bypass getRecord and read/convert here, without the interim byte values.  This should
