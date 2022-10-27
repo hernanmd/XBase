@@ -7,11 +7,21 @@ SequenceableCollection >> asCSVLine [
 	| stream |
 	stream := WriteStream on: (String new: 200).
 	self do: [:each ||item|
-		item := (each isKindOf: String) ifTrue: [each] ifFalse: [(each respondsTo: #printCSVString) ifTrue: [each printCSVString] ifFalse: [each printString]].
+		item := (each isKindOf: String) 
+			ifTrue: [ each ] 
+			ifFalse: [ (each respondsTo: #printCSVString) 
+					ifTrue: [ each printCSVString ] 
+					ifFalse: [ each printString ] ].
 		(item includesAnyOf: (Array with: $, with: Character cr with: Character lf))
 			ifTrue: [
-				stream nextPut: $"; nextPutAll: (item escapeAll: '"' with: $"); nextPutAll: '",']
-			ifFalse: [stream nextPutAll: item; nextPut: $,]].
+				stream 
+					nextPut: $"; 
+					nextPutAll: (item escapeAll: '"' with: $"); 
+					nextPutAll: '",']
+			ifFalse: [
+				stream 
+					nextPutAll: item; 
+					nextPut: $, ] ].
 	self size > 0 ifTrue: [stream skip: -1].
 	^ stream contents
 ]

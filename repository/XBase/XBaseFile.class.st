@@ -746,7 +746,7 @@ XBaseFile >> contentsAsCSVNamed: csvFileName [
 	self modificationTest.
 	fileStream position: headerSize.
 	x := 0.
-	csv := FileStream newFileNamed: csvFileName.
+	csv := csvFileName asFileReference.
 	[ [ : job |
 		job title:  'Converting DBF to CSV (', csvFileName, '), total ', nRecords asString, ' records...'.
 		csv nextPutAll: self fields asCSVLine; cr.
@@ -755,8 +755,7 @@ XBaseFile >> contentsAsCSVNamed: csvFileName [
 				x := x + 1.
 				x = 1000 ifTrue: [
 					x := 0.
-					job progress: incr ] ] ] asJob run 
-	] ensure: [csv close].
+					job progress: incr ] ] ] asJob run	] ensure: [csv close].
 	self currentRecordIndex: nRecords.
 
 ]
@@ -827,7 +826,7 @@ XBaseFile >> contentsWithFields [
 XBaseFile >> create: fDictionary [ 
 	"create a new XBaseFile (with open file stream), with fields defined by fDictionary, and 0 records"
 	| pos |
-	fileStream := (StandardFileStream newFileNamed: fileName) binary.
+	fileStream := fileName asFileReference binary.
 	lastUpdate := Date today.
 	nRecords := 0.
 	currentRecordIndex := 0.
